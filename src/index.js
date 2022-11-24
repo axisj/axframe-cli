@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 
-const { program } = require("commander");
-const fs = require("fs");
-const path = require("path");
-const inquirer = require("inquirer");
-const chalk = require("chalk");
-
-const fetch = require("node-fetch");
+import { program } from "commander";
+import fs from "fs";
+import path from "path";
+import chalk from "chalk";
+import inquirer from "inquirer";
+import fetch from "node-fetch";
 
 const htmlTemplate = `
 <!DOCTYPE html>
@@ -103,7 +102,6 @@ const downloadSource = async () => {
   // 버전 비교하고
 
   // 덮어쓰기
-
 };
 
 program.version("0.0.1", "-v, --version").name("cli");
