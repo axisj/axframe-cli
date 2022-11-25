@@ -2,6 +2,9 @@ import fs from "fs";
 import path from "path";
 import chalk from "chalk";
 import fetch from "node-fetch";
+import https from "https";
+import extract from "extract-zip";
+import os from "os";
 
 export const exist = (dir) => {
   // 폴더 존제 확인 함수
@@ -53,11 +56,28 @@ export const makeTemplate = (type, name, directory) => {
   }
 };
 
-export const gitReleaseSource = async () => {
+export const prepareAXFrameCore = async () => {
   const response = await fetch("https://api.github.com/repos/axisj/axframe/releases");
   const [data] = await response.json();
 
-  console.log(data.zipball_url);
+  const zipFilePath = path.join(os.homedir(), "axframe.zip");
+  const sourcePath = path.join(os.homedir(), "axframe-core-source");
+
+  // latest version: console.log(data.zipball_url);
+  const file = fs.createWriteStream(zipFilePath);
+  const request = https.get(data.zipball_url, function (response) {
+    response.pipe(file);
+
+    // after download completed close filestream
+    file.on("finish", async () => {
+      file.close();
+      mkdir(sourcePath);
+
+      await extract(zipFilePath, { dir: sourcePath });
+      // fs.unlinkSync(zipFilePath);
+      console.log("Download Completed");
+    });
+  });
 
   // 다운로드
   // https://stackoverflow.com/questions/11944932/how-to-download-a-file-with-node-js-without-using-third-party-libraries
