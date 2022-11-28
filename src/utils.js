@@ -1,10 +1,9 @@
 import fs from "fs";
 import path from "path";
 import chalk from "chalk";
-import fetch from "node-fetch";
-import https from "https";
 import extract from "extract-zip";
 import os from "os";
+import fetch from "node-fetch";
 
 export const exist = (dir) => {
   // 폴더 존제 확인 함수
@@ -56,36 +55,35 @@ export const makeTemplate = (type, name, directory) => {
   }
 };
 
+export async function downloadFile(url, targetName) {
+  const res = await fetch(url);
+  const fileStream = res.body.pipe(fs.createWriteStream(targetName));
+
+  return await new Promise((resolve, reject) => {
+    fileStream.on("error", (err) => {
+      reject(err);
+    });
+    fileStream.on("finish", function () {
+      resolve();
+    });
+  });
+}
+
 export const prepareAXFrameCore = async () => {
-  const response = await fetch("https://api.github.com/repos/axisj/axframe/releases");
+  const response = await fetch("https://api.github.com/repos/axisj/axframe/tags");
   const [data] = await response.json();
 
   const zipFilePath = path.join(os.homedir(), "axframe.zip");
   const sourcePath = path.join(os.homedir(), "axframe-core-source");
 
-  // latest version: console.log(data.zipball_url);
-  const file = fs.createWriteStream(zipFilePath);
-  const request = https.get(data.zipball_url, function (response) {
-    response.pipe(file);
+  await downloadFile(data.zipball_url, zipFilePath);
 
-    // after download completed close filestream
-    file.on("finish", async () => {
-      file.close();
-      mkdir(sourcePath);
-
-      await extract(zipFilePath, { dir: sourcePath });
-      // fs.unlinkSync(zipFilePath);
-      console.log("Download Completed");
-    });
+  mkdir(sourcePath);
+  await extract(zipFilePath, {
+    dir: sourcePath,
   });
+  fs.unlinkSync(zipFilePath);
 
-  // 다운로드
-  // https://stackoverflow.com/questions/11944932/how-to-download-a-file-with-node-js-without-using-third-party-libraries
-
-  // 압축풀기
-  // https://www.npmjs.com/package/extract-zip
-
-  // 버전 비교하고
-
-  // 덮어쓰기
+  const targetFolderName = fs.readdirSync(sourcePath)[0];
+  return path.join(os.homedir(), "axframe-core-source", targetFolderName);
 };
