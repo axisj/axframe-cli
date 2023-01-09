@@ -30,29 +30,26 @@ export const mkdir = (dir) => {
   });
 };
 
-export const makeTemplate = (type, name, directory) => {
+export const makeTemplate = (type, name, srcDir, directory) => {
   // 템플릿 생성 함수
-  mkdir(directory);
+  mkdir(directory + "/" + name);
 
-  if (type === "html") {
-    const pathToFile = path.join(directory, `${name}.html`);
+  const fileNames = fs
+    .readdirSync(path.join(srcDir), { withFileTypes: true, encoding: "utf-8" })
+    .filter((p) => p.isFile())
+    .map((p) => p.name);
+
+  fileNames.forEach((fn) => {
+    const data = fs.readFileSync(path.join(srcDir, fn), { encoding: "utf-8" });
+
+    const pathToFile = path.join(directory, name, fn);
     if (exist(pathToFile)) {
       console.error(chalk.bold.red("이미 해당 파일이 존재합니다"));
     } else {
-      // fs.writeFileSync(pathToFile, htmlTemplate);
+      fs.writeFileSync(pathToFile, data);
       console.log(chalk.green(pathToFile, "생성 완료"));
     }
-  } else if (type === "express-router") {
-    const pathToFile = path.join(directory, `${name}.js`);
-    if (exist(pathToFile)) {
-      console.error(chalk.bold.red("이미 해당 파일이 존재합니다"));
-    } else {
-      // fs.writeFileSync(pathToFile, routerTemplate);
-      console.log(chalk.green(pathToFile, "생성 완료"));
-    }
-  } else {
-    console.error(chalk.bold.red("html 또는 express-router 둘 중 하나를 입력하세요."));
-  }
+  });
 };
 
 export async function downloadFile(url, targetName) {
@@ -69,12 +66,12 @@ export async function downloadFile(url, targetName) {
   });
 }
 
-export const prepareAXFrameCore = async () => {
-  const response = await fetch("https://api.github.com/repos/axisj/axframe/tags");
+export const prepareAXFrameCore = async (source_root) => {
+  const response = await fetch("https://api.github.com/repos/axisj/axframe-core/tags");
   const [data] = await response.json();
 
   const zipFilePath = path.join(os.homedir(), "axframe.zip");
-  const sourcePath = path.join(os.homedir(), "axframe-core-source");
+  const sourcePath = path.join(os.homedir(), "axframe-core");
 
   await downloadFile(data.zipball_url, zipFilePath);
 
@@ -85,5 +82,5 @@ export const prepareAXFrameCore = async () => {
   fs.unlinkSync(zipFilePath);
 
   const targetFolderName = fs.readdirSync(sourcePath)[0];
-  return path.join(os.homedir(), "axframe-core-source", targetFolderName);
+  return path.join(os.homedir(), "axframe-core", targetFolderName);
 };
