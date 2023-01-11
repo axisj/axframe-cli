@@ -9,7 +9,7 @@ export const ACTIONS = {
     console.log("targetFolder", targetFolder);
   },
   async update() {},
-  async page() {
+  async page(options) {
     const targetFolder = await prepareAXFrameCore();
 
     const dirs = fs
@@ -17,36 +17,41 @@ export const ACTIONS = {
       .filter((p) => p.isDirectory())
       .map((p) => p.name);
 
-    inquirer
-      .prompt([
-        {
-          type: "input",
-          name: "name",
-          message: "프로그램 이름을 입력하세요.",
-          default: "myProgram",
-        },
-        {
-          type: "input",
-          name: "directory",
-          message: "파일이 위치할 폴더의 경로를 입력하세요.",
-          default: "./pages",
-        },
-        {
-          type: "list",
-          name: "type",
-          message: "템플릿 종류를 선택하세요.",
-          choices: dirs,
-        },
-        {
-          type: "confirm",
-          name: "confirm",
-          message: "생성하시겠습니까?",
-        },
-      ])
-      .then((answers) => {
-        if (answers.confirm) {
-          makeTemplate(answers.type, answers.name, path.join(targetFolder, "pages", answers.type), answers.directory);
-        }
-      });
+    const questions = [
+      {
+        type: "input",
+        name: "name",
+        message: "프로그램 이름을 입력하세요.",
+        default: "myProgram",
+      },
+      {
+        type: "input",
+        name: "directory",
+        message: "파일이 위치할 폴더의 경로를 입력하세요.",
+        default: "./pages",
+      },
+      {
+        type: "list",
+        name: "type",
+        message: "템플릿 종류를 선택하세요.",
+        choices: dirs,
+      },
+      {
+        type: "confirm",
+        name: "confirm",
+        message: "생성하시겠습니까?",
+      },
+    ];
+
+    if (options.name) {
+      questions.shift();
+    }
+
+    inquirer.prompt(questions).then((answers) => {
+      if (answers.confirm) {
+        const name = answers.name || options.name;
+        makeTemplate(answers.type, name, path.join(targetFolder, "pages", answers.type), answers.directory);
+      }
+    });
   },
 };
