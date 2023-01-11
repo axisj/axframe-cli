@@ -4,11 +4,6 @@ import fs from "fs";
 import path from "path";
 
 export const ACTIONS = {
-  async install() {
-    const targetFolder = await prepareAXFrameCore();
-    console.log("targetFolder", targetFolder);
-  },
-  async update() {},
   async page(options) {
     const targetFolder = await prepareAXFrameCore();
 
