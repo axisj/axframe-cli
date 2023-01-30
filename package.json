@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "camelcase": "^7.0.1",
     "chalk": "^4.1.0",
     "commander": "^9.4.1",
     "extract-zip": "^2.0.1",
