@@ -4,6 +4,7 @@ import chalk from "chalk";
 import extract from "extract-zip";
 import os from "os";
 import fetch from "node-fetch";
+import camelCase from "camelcase";
 
 export const exist = (dir) => {
   // 폴더 존제 확인 함수
@@ -40,9 +41,15 @@ export const makeTemplate = (type, name, srcDir, directory) => {
     .map((p) => p.name);
 
   fileNames.forEach((fn) => {
-    const data = fs.readFileSync(path.join(srcDir, fn), { encoding: "utf-8" });
+    let data = fs.readFileSync(path.join(srcDir, fn), { encoding: "utf-8" });
+    let pathToFile = path.join(directory, name, fn);
 
-    const pathToFile = path.join(directory, name, fn);
+    pathToFile = pathToFile.replace(`$${type}$`, camelCase(name, { pascalCase: true }));
+    data = data
+      .replaceAll(`unSubscribe${type}$`, "unSubscribe" + camelCase(name, { pascalCase: true }))
+      .replaceAll(`use$${type}$`, "use" + camelCase(name, { pascalCase: true }))
+      .replaceAll(`$${type}$`, camelCase(name));
+
     if (exist(pathToFile)) {
       console.error(chalk.bold.red("이미 해당 파일이 존재합니다"));
     } else {

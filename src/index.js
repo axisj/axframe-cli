@@ -9,7 +9,9 @@ program.name("axframe-cli").version("0.0.1", "-v, --version");
 program
   .argument("<action>", "")
   .option("-t, --tag [tag]", "axframe core version", "latest")
-  .option("-nm, --name [name]", "page name", "myProgram")
+  .option("-nm, --name [name]", "page name")
+  .option("-dir, --directory [directory]", "directory")
+  .option("-t, --type [type]", "type")
   .action((name, options) => {
     if (!Object.keys(ACTIONS).includes(name)) {
       console.log(msg.notFoundCommand);
